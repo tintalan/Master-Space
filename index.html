@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<!-- saved from url=(0061)file:///C:/Users/tinta/Downloads/master-planner-personal.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Master Planner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-<link rel="stylesheet" href="./index_files/css2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: a planning desk. Summary instruments on top (EC progress, interest coverage, quarter load), then a status board of courses and a deadline list below. */
 :root {
@@ -152,6 +152,37 @@ label.f { display: flex; flex-direction: column; gap: 4px; font-size: 12px; colo
 .sheet-actions { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 6px; z-index: 30; max-width: calc(100% - 32px); }
 @media (prefers-reduced-motion: no-preference) { .card, .btn, .chip { transition: border-color .12s; } }
+.filters { row-gap: 10px; }
+.fgroup { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.flabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.filter-meta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.card-foot { align-items: center; }
+.card-lec { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.cp { display: flex; flex-direction: column; gap: 18px; }
+.crumb { align-self: flex-start; }
+.cp-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.cp-titles { display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1 1 320px; }
+.cp-titles .eyebrow { margin: 0; }
+.cp-name { font-size: 40px; line-height: 1.05; letter-spacing: 0.01em; text-transform: uppercase; color: var(--fg); font-weight: 600; overflow-wrap: anywhere; }
+.cp-notes { color: var(--muted); max-width: 70ch; overflow-wrap: anywhere; white-space: pre-wrap; }
+.lec-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lec-layout { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lec-list { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lec-item { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lec-item:hover { border-color: var(--accent); }
+.lec-item[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.lec-n { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.lec-t { font-weight: 600; overflow-wrap: anywhere; }
+.lec-editor { display: flex; flex-direction: column; gap: 14px; }
+.lec-meta { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 10px; }
+.notes-area { min-height: 46vh; line-height: 1.6; font-size: 15px; resize: vertical; }
+.lec-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+@media (max-width: 760px) {
+  .lec-layout { grid-template-columns: 1fr; }
+  .lec-list { max-height: 220px; overflow: auto; }
+  .lec-meta { grid-template-columns: 1fr; }
+  .cp-name { font-size: 30px; }
+}
 [hidden] { display: none !important; }
 body { margin: 0; }
 </style>
@@ -163,26 +194,26 @@ body { margin: 0; }
       <p class="eyebrow">MSc Aerospace Engineering · Space Engineering profile · TU Delft</p>
       <h1>Master Planner</h1>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="backup" id="backup">Back up</button><button class="btn" data-act="restore" id="restore">Restore</button><input type="file" id="restore-file" accept="application/json,.json" hidden=""><button class="btn primary" data-act="add-course" id="add-course">Add course</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-act="backup" id="backup">Back up</button><button class="btn" data-act="restore" id="restore">Restore</button><input type="file" id="restore-file" accept="application/json,.json" hidden><button class="btn primary" data-act="add-course" id="add-course">Add course</button></div>
   </header>
-  <div id="notice" class="notice" role="status" hidden=""></div>
-  <section class="summary" id="summary" aria-label="Summary"><div class="panel"><h2>Electives</h2><div class="big mono">28<small> / 22 EC</small></div><div class="bar" role="img" aria-label="Elective EC committed 28 of 22"><div class="seg-commit" style="width:100%"></div><div class="seg-consider" style="width:0%"></div></div><div class="legend"><span><i class="seg-commit"></i>Planned, enrolled or completed</span><span><i class="seg-consider"></i>Still considering (6 EC)</span></div><p>6 EC over target</p><div class="settings"><label>Elective target <input id="set-target" class="mono" type="number" min="0" max="120" step="1" value="22"> EC</label><label>Programme <input id="set-total" class="mono" type="number" min="1" max="240" step="1" value="120"> EC</label><span class="mono">All courses committed: 62 / 120</span></div></div><div class="panel"><h2>Interest coverage</h2><div class="cov-row"><span class="cov-label"><span class="dot AI"></span>AI</span><div class="cov-bar"><div class="bar"><div class="seg-commit" style="width:66.66666666666666%"></div><div class="seg-consider" style="width:0%"></div></div><span class="cov-nums">2 chosen · 0 considering</span></div></div><div class="cov-row"><span class="cov-label"><span class="dot Maths"></span>Maths</span><div class="cov-bar"><div class="bar"><div class="seg-commit" style="width:33.33333333333333%"></div><div class="seg-consider" style="width:0%"></div></div><span class="cov-nums">1 chosen · 0 considering</span></div></div><div class="cov-row"><span class="cov-label"><span class="dot Robotics"></span>Robotics</span><div class="cov-bar"><div class="bar"><div class="seg-commit" style="width:100%"></div><div class="seg-consider" style="width:0%"></div></div><span class="cov-nums">3 chosen · 0 considering</span></div></div><div class="cov-row"><span class="cov-label"><span class="dot Propulsion"></span>Propulsion</span><div class="cov-bar"><div class="bar"><div class="seg-commit" style="width:66.66666666666666%"></div><div class="seg-consider" style="width:0%"></div></div><span class="cov-nums">2 chosen · 0 considering</span></div></div><div class="cov-row"><span class="cov-label"><span class="dot Finance"></span>Finance</span><div class="cov-bar"><div class="bar"><div class="seg-commit" style="width:0%"></div><div class="seg-consider" style="width:0%"></div></div><span class="cov-nums">0 chosen · 0 considering</span></div></div></div><div class="panel"><h2>Load per quarter</h2><div class="load"><div class="load-col"><div class="load-val">12</div><div class="load-stack"><div class="seg-commit" style="height:46.883720930232556px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y1 Q1</div></div><div class="load-col"><div class="load-val">11.5</div><div class="load-stack"><div class="seg-commit" style="height:44.93023255813953px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y1 Q2</div></div><div class="load-col"><div class="load-val">21.5</div><div class="load-stack"><div class="seg-commit" style="height:84px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y1 Q3</div></div><div class="load-col"><div class="load-val">8</div><div class="load-stack"><div class="seg-commit" style="height:31.25581395348837px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y1 Q4</div></div><div class="load-col"><div class="load-val">12</div><div class="load-stack"><div class="seg-commit" style="height:35.16279069767442px"></div><div class="seg-consider" style="height:11.720930232558139px"></div></div><div class="load-lab">Y2 Q1</div></div><div class="load-col"><div class="load-val">3</div><div class="load-stack"><div class="seg-commit" style="height:0px"></div><div class="seg-consider" style="height:11.720930232558139px"></div></div><div class="load-lab">Y2 Q2</div></div><div class="load-col"><div class="load-val"></div><div class="load-stack"><div class="seg-commit" style="height:0px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y2 Q3</div></div><div class="load-col"><div class="load-val"></div><div class="load-stack"><div class="seg-commit" style="height:0px"></div><div class="seg-consider" style="height:0px"></div></div><div class="load-lab">Y2 Q4</div></div></div><p class="muted" style="font-size:12px">Year and quarter set on each course. Courses spanning two quarters split their EC evenly.</p></div></section>
-  <nav class="tabs" role="tablist" aria-label="Sections">
+  <div id="notice" class="notice" role="status" hidden></div>
+  <section class="summary" id="summary" aria-label="Summary"></section>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button class="tab" role="tab" id="tab-courses" data-act="tab" data-v="courses" aria-selected="true">Courses</button>
     <button class="tab" role="tab" id="tab-deadlines" data-act="tab" data-v="deadlines" aria-selected="false">Deadlines</button>
   </nav>
-  <main id="view"><div class="filters"><div class="seg" role="group" aria-label="Course type"><button data-act="kind" data-v="all" aria-pressed="true">All</button><button data-act="kind" data-v="elective" aria-pressed="false">Electives</button><button data-act="kind" data-v="core" aria-pressed="false">Core</button></div><div class="tags" role="group" aria-label="Filter by interest"><button class="chip" data-act="tag" data-v="AI" aria-pressed="false"><span class="dot AI"></span>AI</button><button class="chip" data-act="tag" data-v="Maths" aria-pressed="false"><span class="dot Maths"></span>Maths</button><button class="chip" data-act="tag" data-v="Robotics" aria-pressed="false"><span class="dot Robotics"></span>Robotics</button><button class="chip" data-act="tag" data-v="Propulsion" aria-pressed="false"><span class="dot Propulsion"></span>Propulsion</button><button class="chip" data-act="tag" data-v="Finance" aria-pressed="false"><span class="dot Finance"></span>Finance</button></div></div><div class="board"><section class="col" aria-label="Considering"><div class="col-head"><h3 style="font-size:20px;text-transform:uppercase">Considering</h3><span class="mono">1 · 6 EC</span></div><article class="card" tabindex="0" data-act="edit" data-id="f8f25da5-9d44-493f-8758-63d38215f4e8"><div class="card-code"><span>AP3071</span><span>6 EC · Y2 Q1+Q2</span></div><div class="card-name">Advanced Electrodynamics</div><div class="card-meta"></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="f8f25da5-9d44-493f-8758-63d38215f4e8" disabled="" aria-label="Move to ">←</button><button class="btn small" data-act="move" data-dir="1" data-id="f8f25da5-9d44-493f-8758-63d38215f4e8" aria-label="Move to Planned">→</button></div></article></section><section class="col" aria-label="Planned"><div class="col-head"><h3 style="font-size:20px;text-transform:uppercase">Planned</h3><span class="mono">0 · 0 EC</span></div><p class="col-empty">Nothing here.</p></section><section class="col" aria-label="Enrolled"><div class="col-head"><h3 style="font-size:20px;text-transform:uppercase">Enrolled</h3><span class="mono">14 · 62 EC</span></div><article class="card" tabindex="0" data-act="edit" data-id="core-astrodynamics"><div class="card-code"><span>No code</span><span>4 EC · Y1 Q1</span></div><div class="card-name">Fundamentals of Astrodynamics</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-note">Space track core course (study guide). Set the real status.</div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="core-astrodynamics" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="core-astrodynamics" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="core-planetary-1"><div class="card-code"><span>No code</span><span>4 EC · Y1 Q1</span></div><div class="card-name">Planetary Sciences I</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-note">Space track core course (study guide). Set the real status.</div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="core-planetary-1" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="core-planetary-1" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="core-space-instrumentation"><div class="card-code"><span>No code</span><span>4 EC · Y2 Q1</span></div><div class="card-name">Space Instrumentation</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-note">Space track core course (study guide). Set the real status.</div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="core-space-instrumentation" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="core-space-instrumentation" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="core-sse"><div class="card-code"><span>No code</span><span>4 EC · Y1 Q1</span></div><div class="card-name">Space Systems Engineering</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-note">Space track core course (study guide). Set the real status.</div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="core-sse" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="core-sse" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="5b7ce8cf-8d95-4bbc-aa43-affc0e5e245a"><div class="card-code"><span>AE4143</span><span>3 EC · Y1 Q2+Q3</span></div><div class="card-name">Hypersonic Aerodynamics</div><div class="card-meta"><span class="chip static"><span class="dot Propulsion"></span>Propulsion</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="5b7ce8cf-8d95-4bbc-aa43-affc0e5e245a" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="5b7ce8cf-8d95-4bbc-aa43-affc0e5e245a" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="ae4317-autonomous-mav"><div class="card-code"><span>AE4317</span><span>4 EC · Y1 Q3</span></div><div class="card-name">Autonomous Flight of Micro Air Vehicles</div><div class="card-meta"><span class="chip static"><span class="dot AI"></span>AI</span><span class="chip static"><span class="dot Robotics"></span>Robotics</span></div><div class="card-note">Computationally efficient, bio-inspired autonomy for MAVs. Verify EC and quarter.</div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="ae4317-autonomous-mav" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="ae4317-autonomous-mav" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="4a1d464e-a536-4bc2-b714-6fac634a7818"><div class="card-code"><span>AE4902</span><span>5 EC · Y1 Q2</span></div><div class="card-name">Attitude and Orbit Control</div><div class="card-meta"><span class="tag-core">CORE</span><span class="chip static"><span class="dot Robotics"></span>Robotics</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="4a1d464e-a536-4bc2-b714-6fac634a7818" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="4a1d464e-a536-4bc2-b714-6fac634a7818" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="94fe0d61-f261-4df5-9679-ef7191eb58c0"><div class="card-code"><span>AE4903</span><span>5 EC · Y1 Q2</span></div><div class="card-name">Space Propulsion</div><div class="card-meta"><span class="tag-core">CORE</span><span class="chip static"><span class="dot Propulsion"></span>Propulsion</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="94fe0d61-f261-4df5-9679-ef7191eb58c0" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="94fe0d61-f261-4df5-9679-ef7191eb58c0" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="49d84712-18ed-42bc-a9ee-ff5abe27a793"><div class="card-code"><span>AE4904</span><span>5 EC · Y1 Q3</span></div><div class="card-name">Space Engineering Detailed Design Project</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="49d84712-18ed-42bc-a9ee-ff5abe27a793" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="49d84712-18ed-42bc-a9ee-ff5abe27a793" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="b397716e-9d9d-485b-b406-441498d3cde7"><div class="card-code"><span>AP3551</span><span>6 EC · Y1 Q3+Q4</span></div><div class="card-name">Computational Multiphase Flow</div><div class="card-meta"><span class="chip static"><span class="dot Propulsion"></span>Propulsion</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="b397716e-9d9d-485b-b406-441498d3cde7" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="b397716e-9d9d-485b-b406-441498d3cde7" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="1f1b7640-22da-4f15-be43-1d76a25df425"><div class="card-code"><span>DSAIT4005</span><span>5 EC · Y2 Q1</span></div><div class="card-name">Machine and Deep Learning</div><div class="card-meta"><span class="chip static"><span class="dot AI"></span>AI</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="1f1b7640-22da-4f15-be43-1d76a25df425" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="1f1b7640-22da-4f15-be43-1d76a25df425" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="d7cd0e2a-1c73-4488-aa4e-74263b90706d"><div class="card-code"><span>RO47021</span><span>5 EC · Y1 Q3</span></div><div class="card-name">Intelligent Control Systems</div><div class="card-meta"><span class="chip static"><span class="dot Robotics"></span>Robotics</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="d7cd0e2a-1c73-4488-aa4e-74263b90706d" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="d7cd0e2a-1c73-4488-aa4e-74263b90706d" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="7000c61e-23c0-4e05-913f-22f5173fd986"><div class="card-code"><span>SC42110</span><span>5 EC · Y1 Q4</span></div><div class="card-name">Dynamic Programming and Stochastic Control</div><div class="card-meta"><span class="chip static"><span class="dot Maths"></span>Maths</span><span class="chip static"><span class="dot Robotics"></span>Robotics</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="7000c61e-23c0-4e05-913f-22f5173fd986" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="7000c61e-23c0-4e05-913f-22f5173fd986" aria-label="Move to Completed">→</button></div></article><article class="card" tabindex="0" data-act="edit" data-id="f4268920-22f6-4ecb-b5fa-9ec2c6f3083e"><div class="card-code"><span>WM0324LR</span><span>3 EC · Y1 Q3</span></div><div class="card-name">Ethics and Engineering for Aerospace Engineering</div><div class="card-meta"><span class="tag-core">CORE</span></div><div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="f4268920-22f6-4ecb-b5fa-9ec2c6f3083e" aria-label="Move to Planned">←</button><button class="btn small" data-act="move" data-dir="1" data-id="f4268920-22f6-4ecb-b5fa-9ec2c6f3083e" aria-label="Move to Completed">→</button></div></article></section><section class="col" aria-label="Completed"><div class="col-head"><h3 style="font-size:20px;text-transform:uppercase">Completed</h3><span class="mono">0 · 0 EC</span></div><p class="col-empty">Nothing here.</p></section></div></main>
-  <p class="muted" style="font-size:12px">Your data is stored in this browser on this device only. Use Back up to save a copy as a file, and Restore to load one.</p>
+  <main id="view"></main>
+  <p class="muted" style="font-size:12px">Your data is stored in this browser on this device only. Use Back up to save a copy as a file (lecture notes are included), and Restore to load one.</p>
 </div>
 
-<div class="overlay" id="overlay" hidden="">
+<div class="overlay" id="overlay" hidden>
   <form class="sheet" id="course-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" autocomplete="off">
-    <h3 id="sheet-title">Edit course</h3>
+    <h3 id="sheet-title">Course</h3>
     <div class="grid2">
       <label class="f" for="f-code">Course code<input class="in mono" id="f-code" placeholder="AE4S01"></label>
       <label class="f" for="f-ec">EC<input class="in mono" id="f-ec" type="number" min="0" max="60" step="0.5" placeholder="Unknown"></label>
     </div>
-    <label class="f" for="f-name">Name<input class="in" id="f-name" required="" placeholder="Course name"></label>
+    <label class="f" for="f-name">Name<input class="in" id="f-name" required placeholder="Course name"></label>
     <div class="grid3">
       <label class="f" for="f-status">Status
         <select class="in" id="f-status">
@@ -198,9 +229,9 @@ body { margin: 0; }
       <select class="in" id="f-kind"><option value="elective">Elective</option><option value="core">Core or profile</option></select></label>
     <fieldset style="border:0;padding:0;margin:0;min-width:0">
       <legend class="muted" style="font-size:12px;padding:0 0 4px">Interests it serves</legend>
-      <div class="tags" id="f-tags"><button type="button" class="chip" data-act="sheet-tag" data-v="AI" aria-pressed="false"><span class="dot AI"></span>AI</button><button type="button" class="chip" data-act="sheet-tag" data-v="Maths" aria-pressed="false"><span class="dot Maths"></span>Maths</button><button type="button" class="chip" data-act="sheet-tag" data-v="Robotics" aria-pressed="false"><span class="dot Robotics"></span>Robotics</button><button type="button" class="chip" data-act="sheet-tag" data-v="Propulsion" aria-pressed="false"><span class="dot Propulsion"></span>Propulsion</button><button type="button" class="chip" data-act="sheet-tag" data-v="Finance" aria-pressed="false"><span class="dot Finance"></span>Finance</button></div>
+      <div class="tags" id="f-tags"></div>
     </fieldset>
-    <label class="f" for="f-notes">Notes<textarea class="in" id="f-notes" rows="3" placeholder="Prerequisites, workload, who to ask"></textarea></label>
+    <label class="f" for="f-notes">Course notes<textarea class="in" id="f-notes" rows="3" placeholder="Prerequisites, workload, exam format, who to ask"></textarea></label>
     <div class="sheet-actions">
       <button type="button" class="btn danger" id="f-delete" data-act="del-course">Delete</button>
       <span style="display:flex;gap:8px">
@@ -210,7 +241,7 @@ body { margin: 0; }
     </div>
   </form>
 </div>
-<div class="toast" id="toast" role="status" hidden=""></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (function () {
@@ -222,7 +253,8 @@ body { margin: 0; }
 
   var S = {
     db: null, courses: new Map(), deadlines: new Map(), settings: Object.assign({}, DEFAULTS),
-    loaded: { c: false, d: false }, tab: "courses", kind: "all", tag: null, editing: null, confirmDelete: false
+    loaded: { c: false, d: false }, tab: "courses", kind: "all", tag: null, year: null, quarter: null, editing: null, confirmDelete: false,
+    lectures: new Map(), openCourse: null, lectureId: null, confirmLec: null
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -244,9 +276,19 @@ body { margin: 0; }
 
   /* ---------- storage ---------- */
   var KEY = "masterPlanner.v1";
+  function snapshot() {
+    return { v: 1, courses: courseList(), deadlines: Array.from(S.deadlines.values()), lectures: Array.from(S.lectures.values()), settings: S.settings };
+  }
+  var pending = null;
+  function setSaved(ok) { var el = $("l-status"); if (el) el.textContent = ok ? "Saved" : "Saving…"; }
+  function persistSoon() {
+    clearTimeout(pending); setSaved(false);
+    pending = setTimeout(function () { pending = null; persist(); setSaved(true); }, 400);
+  }
+  function flushPersist() { if (pending) { clearTimeout(pending); pending = null; persist(); } }
   function persist() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ v: 1, courses: courseList(), deadlines: Array.from(S.deadlines.values()), settings: S.settings }));
+      localStorage.setItem(KEY, JSON.stringify(snapshot()));
     } catch (e) {
       setNotice("This browser is blocking storage, so changes last only until you close the page. Use Back up to keep a copy.");
     }
@@ -332,6 +374,14 @@ body { margin: 0; }
   /* ---------- rendering: courses ---------- */
   function chipHTML(t) { return '<span class="chip static"><span class="dot ' + esc(t) + '"></span>' + esc(t) + '</span>'; }
 
+  function quarterParts(c) { return String(c.quarter || "").replace(/Q/g, "").split("+").filter(Boolean); }
+  function lecturesOf(courseId) { return Array.from(S.lectures.values()).filter(function (l) { return l.courseId === courseId; }); }
+  function plural(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+  function seg(act, cur, opts, label) {
+    return '<div class="fgroup"><span class="flabel">' + label + '</span><div class="seg" role="group" aria-label="' + label + '">' +
+      opts.map(function (o) { return '<button data-act="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (String(cur || "") === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div></div>';
+  }
+
   function renderCourses() {
     var v = $("view");
     if (!S.loaded.c) { v.innerHTML = '<div class="empty muted">Loading your courses…</div>'; return; }
@@ -346,14 +396,22 @@ body { margin: 0; }
       if (S.kind === "elective" && c.kind !== "elective") return false;
       if (S.kind === "core" && c.kind !== "core") return false;
       if (S.tag && (c.tags || []).indexOf(S.tag) < 0) return false;
+      if (S.year && String(c.year || "") !== S.year) return false;
+      if (S.quarter && quarterParts(c).indexOf(S.quarter) < 0) return false;
       return true;
     }).sort(sortCourses);
+    var filtering = S.kind !== "all" || S.tag || S.year || S.quarter;
 
-    var kindBtn = function (val, lab) { return '<button data-act="kind" data-v="' + val + '" aria-pressed="' + (S.kind === val) + '">' + lab + '</button>'; };
-    var html = '<div class="filters"><div class="seg" role="group" aria-label="Course type">' + kindBtn("all", "All") + kindBtn("elective", "Electives") + kindBtn("core", "Core") + '</div>' +
+    var html = '<div class="filters">' +
+      seg("kind", S.kind, [["all", "All"], ["elective", "Electives"], ["core", "Core"]], "Type") +
+      seg("year", S.year, [["", "All"], ["1", "Year 1"], ["2", "Year 2"]], "Year") +
+      seg("quarter", S.quarter, [["", "All"], ["1", "Q1"], ["2", "Q2"], ["3", "Q3"], ["4", "Q4"]], "Quarter") +
       '<div class="tags" role="group" aria-label="Filter by interest">' + TAGS.map(function (t) {
         return '<button class="chip" data-act="tag" data-v="' + t + '" aria-pressed="' + (S.tag === t) + '"><span class="dot ' + t + '"></span>' + t + '</button>';
-      }).join("") + '</div></div><div class="board">';
+      }).join("") + '</div></div>' +
+      '<div class="filter-meta"><span>Showing ' + shown.length + ' of ' + all.length + ' courses</span>' +
+      (S.quarter ? '<span>Courses that span two quarters appear under both.</span>' : '') +
+      (filtering ? '<button class="btn small" data-act="clear-filters">Clear filters</button>' : '') + '</div><div class="board">';
 
     STATUSES.forEach(function (st, i) {
       var inCol = shown.filter(function (c) { return (c.status || "considering") === st[0]; });
@@ -362,17 +420,86 @@ body { margin: 0; }
       if (!inCol.length) html += '<p class="col-empty">Nothing here.</p>';
       inCol.forEach(function (c) {
         var when = (c.year ? "Y" + c.year + " " : "") + (c.quarter || "");
-        html += '<article class="card" tabindex="0" data-act="edit" data-id="' + esc(c.id) + '">' +
+        var nLec = lecturesOf(c.id).length;
+        html += '<article class="card" tabindex="0" data-act="open" data-id="' + esc(c.id) + '">' +
           '<div class="card-code"><span>' + esc(c.code || "No code") + '</span><span>' + ecText(c.ec) + ' EC' + (when.trim() ? ' · ' + esc(when.trim()) : '') + '</span></div>' +
           '<div class="card-name">' + esc(c.name) + '</div>' +
           '<div class="card-meta">' + (c.kind === "core" ? '<span class="tag-core">CORE</span>' : '') + (c.tags || []).map(chipHTML).join("") + '</div>' +
           (c.notes ? '<div class="card-note">' + esc(c.notes) + '</div>' : '') +
+          (nLec ? '<div class="card-lec">' + plural(nLec, "lecture") + '</div>' : '') +
           '<div class="card-foot"><button class="btn small" data-act="move" data-dir="-1" data-id="' + esc(c.id) + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move to ' + (i ? STATUSES[i - 1][1] : '') + '">←</button>' +
+          '<button class="btn small" data-act="edit" data-id="' + esc(c.id) + '">Edit</button>' +
           '<button class="btn small" data-act="move" data-dir="1" data-id="' + esc(c.id) + '"' + (i === STATUSES.length - 1 ? ' disabled' : '') + ' aria-label="Move to ' + (i < STATUSES.length - 1 ? STATUSES[i + 1][1] : '') + '">→</button></div></article>';
       });
       html += '</section>';
     });
     v.innerHTML = html + '</div>';
+  }
+
+  /* ---------- course page and lecture notes ---------- */
+  function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function fmtDate(s) { var d = parseDay(s); return d ? d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "No date"; }
+  function sortedLectures(courseId) {
+    return lecturesOf(courseId).sort(function (a, b) { return String(b.date || "").localeCompare(String(a.date || "")) || (b.n || 0) - (a.n || 0); });
+  }
+  function lecLabel(l) { return (l.title && l.title.trim()) || ("Lecture " + (l.n || "")); }
+  function lectureListHTML(courseId) {
+    return sortedLectures(courseId).map(function (l) {
+      return '<button type="button" class="lec-item" data-act="pick-lecture" data-id="' + esc(l.id) + '" aria-current="' + (l.id === S.lectureId) + '">' +
+        '<span class="lec-n">#' + esc(l.n) + ' · ' + esc(fmtDate(l.date)) + '</span><span class="lec-t">' + esc(lecLabel(l)) + '</span></button>';
+    }).join("");
+  }
+  function renderLectureList() { var el = $("lec-list"); if (el && S.openCourse) el.innerHTML = lectureListHTML(S.openCourse); }
+  function lectureEditorHTML(l) {
+    return '<div class="lec-editor"><div class="lec-meta">' +
+      '<label class="f" for="l-title">Title<input class="in" id="l-title" value="' + esc(l.title) + '" placeholder="Lecture ' + esc(l.n) + '"></label>' +
+      '<label class="f" for="l-date">Date<input class="in mono" id="l-date" type="date" value="' + esc(l.date) + '"></label></div>' +
+      '<label class="f" for="l-notes">Notes<textarea class="in notes-area" id="l-notes" placeholder="Key ideas, derivations, examples, what the lecturer stressed">\n' + esc(l.notes) + '</textarea></label>' +
+      '<label class="f" for="l-follow">Questions and follow-ups<textarea class="in" id="l-follow" rows="4" placeholder="What to ask, look up or practise">\n' + esc(l.follow) + '</textarea></label>' +
+      '<div class="lec-foot"><span class="mono muted" id="l-status" aria-live="polite">Saved</span>' +
+      '<button type="button" class="btn danger small" data-act="del-lecture" data-id="' + esc(l.id) + '">' + (S.confirmLec === l.id ? 'Confirm delete' : 'Delete lecture') + '</button></div></div>';
+  }
+  function renderCoursePage(c) {
+    var list = sortedLectures(c.id);
+    if (!list.some(function (l) { return l.id === S.lectureId; })) S.lectureId = list.length ? list[0].id : null;
+    var sel = S.lectureId ? S.lectures.get(S.lectureId) : null;
+    var stName = (STATUSES.filter(function (x) { return x[0] === (c.status || "considering"); })[0] || ["", ""])[1];
+    var when = (c.year ? "Y" + c.year + " " : "") + (c.quarter || "");
+    $("view").innerHTML = '<div class="cp"><button class="btn small crumb" data-act="back">← All courses</button>' +
+      '<header class="cp-head"><div class="cp-titles"><p class="eyebrow">' + esc(c.code || "No code") + ' · ' + ecText(c.ec) + ' EC' + (when.trim() ? ' · ' + esc(when.trim()) : '') + ' · ' + esc(stName) + '</p>' +
+      '<h2 class="cp-name">' + esc(c.name) + '</h2>' +
+      '<div class="card-meta">' + (c.kind === "core" ? '<span class="tag-core">CORE</span>' : '') + (c.tags || []).map(chipHTML).join("") + '</div>' +
+      (c.notes ? '<p class="cp-notes">' + esc(c.notes) + '</p>' : '') + '</div>' +
+      '<button class="btn" data-act="edit" data-id="' + esc(c.id) + '">Edit details</button></header>' +
+      '<div class="lec-bar"><h2>Lectures · ' + list.length + '</h2><button class="btn primary" data-act="new-lecture">New lecture</button></div>' +
+      (list.length
+        ? '<div class="lec-layout"><div class="lec-list" id="lec-list">' + lectureListHTML(c.id) + '</div><div class="panel" id="lec-pane">' + (sel ? lectureEditorHTML(sel) : '') + '</div></div>'
+        : '<div class="empty"><h3 style="font-size:24px;text-transform:uppercase">No lectures yet</h3><p class="muted">Add one after each lecture. Notes save automatically in this browser and are included in Back up.</p><button class="btn primary" data-act="new-lecture">Add the first lecture</button></div>') +
+      '</div>';
+  }
+  function newLecture() {
+    var cid = S.openCourse; if (!cid) return;
+    var n = lecturesOf(cid).reduce(function (m, l) { return Math.max(m, l.n || 0); }, 0) + 1;
+    var id = newId();
+    S.lectures.set(id, { id: id, courseId: cid, n: n, title: "", date: today(), notes: "", follow: "", created: Date.now(), updated: Date.now() });
+    S.lectureId = id; S.confirmLec = null; persist(); renderAll();
+    var t = $("l-title"); if (t) t.focus();
+  }
+  function readRoute() {
+    var m = /^#course\/(.+)$/.exec(location.hash || "");
+    if (!m) return null;
+    try { var id = decodeURIComponent(m[1]); return S.courses.has(id) ? id : null; } catch (e) { return null; }
+  }
+  function openCourse(id) {
+    flushPersist(); S.openCourse = id; S.lectureId = null; S.confirmLec = null;
+    var h = "#course/" + encodeURIComponent(id);
+    if (location.hash !== h) { try { location.hash = h; } catch (e) {} }
+    renderAll(); window.scrollTo(0, 0);
+  }
+  function closeCourse() {
+    flushPersist(); S.openCourse = null; S.lectureId = null; S.confirmLec = null;
+    if (location.hash) { try { location.hash = ""; } catch (e) {} }
+    renderAll(); window.scrollTo(0, 0);
   }
 
   /* ---------- rendering: deadlines ---------- */
@@ -422,6 +549,11 @@ body { margin: 0; }
   }
 
   function renderAll() {
+    var oc = S.openCourse ? S.courses.get(S.openCourse) : null;
+    if (S.openCourse && !oc) S.openCourse = null;
+    $("summary").hidden = !!oc; $("tabs").hidden = !!oc;
+    document.title = oc ? oc.name + " · Master Planner" : "Master Planner";
+    if (oc) { renderCoursePage(oc); return; }
     renderSummary();
     $("tab-courses").setAttribute("aria-selected", S.tab === "courses");
     $("tab-deadlines").setAttribute("aria-selected", S.tab === "deadlines");
@@ -477,7 +609,19 @@ body { margin: 0; }
     var act = el.getAttribute("data-act"), id = el.getAttribute("data-id"), v = el.getAttribute("data-v");
     if (act === "tab") { S.tab = v; renderAll(); }
     else if (act === "add-course") openSheet(null);
-    else if (act === "edit") { if (!e.target.closest("button")) openSheet(id); }
+    else if (act === "open") { if (!e.target.closest("button")) openCourse(id); }
+    else if (act === "edit") openSheet(id);
+    else if (act === "back") closeCourse();
+    else if (act === "new-lecture") newLecture();
+    else if (act === "pick-lecture") {
+      flushPersist(); S.lectureId = id; S.confirmLec = null; renderAll();
+      var pane = $("lec-pane");
+      if (pane && window.matchMedia && window.matchMedia("(max-width: 760px)").matches) pane.scrollIntoView({ block: "start" });
+    }
+    else if (act === "del-lecture") {
+      if (S.confirmLec !== id) { S.confirmLec = id; el.textContent = "Confirm delete"; return; }
+      S.lectures.delete(id); S.confirmLec = null; S.lectureId = null; persist(); renderAll();
+    }
     else if (act === "move") {
       e.stopPropagation();
       var c = S.courses.get(id); if (!c) return;
@@ -486,12 +630,20 @@ body { margin: 0; }
       var copy = Object.assign({}, c); delete copy.id; copy.status = next[0]; put("courses", id, copy);
     }
     else if (act === "kind") { S.kind = v; renderAll(); }
+    else if (act === "year") { S.year = v || null; renderAll(); }
+    else if (act === "quarter") { S.quarter = v || null; renderAll(); }
+    else if (act === "clear-filters") { S.kind = "all"; S.tag = null; S.year = null; S.quarter = null; renderAll(); }
     else if (act === "tag") { S.tag = S.tag === v ? null : v; renderAll(); }
     else if (act === "sheet-tag") { el.setAttribute("aria-pressed", String(el.getAttribute("aria-pressed") !== "true")); }
     else if (act === "close-sheet") closeSheet();
     else if (act === "del-course") {
-      if (!S.confirmDelete) { S.confirmDelete = true; el.textContent = "Confirm delete"; return; }
-      remove("courses", S.editing); closeSheet();
+      var nl = lecturesOf(S.editing).length;
+      if (!S.confirmDelete) { S.confirmDelete = true; el.textContent = nl ? "Delete course and " + plural(nl, "lecture") : "Confirm delete"; return; }
+      var gone = S.editing;
+      Array.from(S.lectures.values()).forEach(function (l) { if (l.courseId === gone) S.lectures.delete(l.id); });
+      closeSheet();
+      if (S.openCourse === gone) closeCourse();
+      remove("courses", gone);
     }
     else if (act === "del-dl") remove("deadlines", id);
     else if (act === "backup") backup();
@@ -499,7 +651,7 @@ body { margin: 0; }
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !$("overlay").hidden) closeSheet();
-    if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches('.card[data-act="edit"]')) { e.preventDefault(); openSheet(e.target.getAttribute("data-id")); }
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches('.card[data-act="open"]')) { e.preventDefault(); openCourse(e.target.getAttribute("data-id")); }
   });
   $("overlay").addEventListener("mousedown", function (e) { if (e.target === $("overlay")) closeSheet(); });
   $("course-form").addEventListener("submit", saveCourse);
@@ -730,6 +882,9 @@ body { margin: 0; }
     S.courses = new Map((d.courses || []).filter(function (c) { return c && typeof c.id === "string"; }).map(function (c) { return [c.id, c]; }));
     S.deadlines = new Map((d.deadlines || []).filter(function (x) { return x && typeof x.id === "string"; }).map(function (x) { return [x.id, x]; }));
     S.settings = Object.assign({}, DEFAULTS, d.settings || {});
+    if (Array.isArray(d.lectures)) {
+      S.lectures = new Map(d.lectures.filter(function (l) { return l && typeof l.id === "string" && typeof l.courseId === "string"; }).map(function (l) { return [l.id, l]; }));
+    }
     S.loaded.c = true; S.loaded.d = true;
   }
   function load() {
@@ -742,7 +897,7 @@ body { margin: 0; }
   }
 
   function backup() {
-    var blob = new Blob([JSON.stringify({ v: 1, courses: courseList(), deadlines: Array.from(S.deadlines.values()), settings: S.settings }, null, 2)], { type: "application/json" });
+    var blob = new Blob([JSON.stringify(snapshot(), null, 2)], { type: "application/json" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     var d = new Date();
@@ -764,10 +919,29 @@ body { margin: 0; }
     r.readAsText(f); e.target.value = "";
   });
 
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t.id || t.id.indexOf("l-") !== 0 || !S.lectureId) return;
+    var l = S.lectures.get(S.lectureId); if (!l) return;
+    if (t.id === "l-title") { l.title = t.value; renderLectureList(); }
+    else if (t.id === "l-date") { l.date = t.value; renderLectureList(); }
+    else if (t.id === "l-notes") l.notes = t.value;
+    else if (t.id === "l-follow") l.follow = t.value;
+    else return;
+    l.updated = Date.now();
+    persistSoon();
+  });
+  window.addEventListener("hashchange", function () {
+    var id = readRoute();
+    if (id !== S.openCourse) { flushPersist(); S.openCourse = id; S.lectureId = null; S.confirmLec = null; renderAll(); window.scrollTo(0, 0); }
+  });
+  window.addEventListener("pagehide", flushPersist);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) flushPersist(); });
+
   load();
+  S.openCourse = readRoute();
   renderAll();
 })();
 </script>
-
-
-</body></html>
+</body>
+</html>
